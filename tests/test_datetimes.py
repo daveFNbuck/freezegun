@@ -3,6 +3,8 @@ import datetime
 import unittest
 import locale
 import sys
+from hypothesis import given
+from hypothesisdatetime.datetime import naive_datetime
 
 from nose.plugins import skip
 from tests import utils
@@ -183,6 +185,11 @@ def test_date_object():
     regular_freezer = freeze_time('2012-11-10')
     assert date_freezer.time_to_freeze == regular_freezer.time_to_freeze
 
+def test_old_date_object():
+    frozen_date = datetime.date(year=1, month=1, day=1)
+    with freeze_time(frozen_date):
+        assert datetime.date.today() == frozen_date
+
 def test_date_with_locale():
     with temp_locale(*_dd_mm_yyyy_locales):
         frozen_date = datetime.date(year=2012, month=1, day=2)
@@ -204,6 +211,11 @@ def test_datetime_object():
     datetime_freezer = freeze_time(frozen_datetime)
     regular_freezer = freeze_time('2012-11-10 04:15:30')
     assert datetime_freezer.time_to_freeze == regular_freezer.time_to_freeze
+
+@given(naive_datetime)
+def test_datetime_objects(dt_object):
+    with freeze_time(dt_object):
+        assert datetime.datetime.now() == dt_object
 
 def test_datetime_with_locale():
     with temp_locale(*_dd_mm_yyyy_locales):
